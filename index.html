@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe PDF Parser Tester 🧑‍🍳</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #2d3436;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .auth-section {
+            margin-bottom: 20px;
+        }
+
+        .auth-status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .auth-status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .auth-status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        input[type="text"], input[type="file"], select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="file"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .file-upload {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+
+        .file-upload.dragover {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+
+        .file-upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00b894, #00a085);
+        }
+
+        .response-section {
+            margin-top: 30px;
+            grid-column: 1 / -1;
+        }
+
+        .response-container {
+            background: #2d3436;
+            color: #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid #636e72;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #636e72;
+        }
+
+        .status-success {
+            color: #00b894;
+            font-weight: bold;
+        }
+
+        .status-error {
+            color: #e17055;
+            font-weight: bold;
+        }
+
+        .json-pretty {
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .recipe-preview {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .recipe-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+
+        .recipe-meta {
+            color: #636e72;
+            margin-bottom: 15px;
+        }
+
+        .ingredients-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .ingredients-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .ingredient-name {
+            font-weight: 600;
+        }
+
+        .ingredient-details {
+            color: #636e72;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍳 Recipe PDF Parser Tester</h1>
+            <p>Upload PDFs, get structured recipes with pricing!</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Authentication Section -->
+            <div class="card">
+                <h2>🔐 Authentication</h2>
+                
+                <!-- Sign In Form -->
+                <div id="signInForm" class="auth-section">
+                    <div class="form-group">
+                        <label for="loginEmail">Email:</label>
+                        <input type="email" id="loginEmail" placeholder="your.email@example.com" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password">
+                    </div>
+                    <button onclick="signInWithEmail()">Sign In</button>
+                    <button onclick="showTokenForm()" class="btn-secondary">Use Manual Token</button>
+                </div>
+
+                <!-- Manual Token Form (hidden by default) -->
+                <div id="tokenForm" class="auth-section" style="display: none;">
+                    <div class="form-group">
+                        <label for="firebaseToken">Firebase ID Token:</label>
+                        <input type="text" id="firebaseToken" placeholder="Paste your Firebase ID token here">
+                        <small style="color: #636e72; font-size: 0.9em;">
+                            Get this from your Firebase console or frontend app
+                        </small>
+                    </div>
+                    <button onclick="testAuth()">Test Connection</button>
+                    <button onclick="showSignInForm()" class="btn-secondary">Back to Sign In</button>
+                </div>
+
+                <!-- Auth Status -->
+                <div class="auth-section">
+                    <div id="authStatus" class="auth-status disconnected">
+                        Not Connected
+                    </div>
+                    <div id="userInfo" style="display: none; margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px;">
+                        <div id="userDetails"></div>
+                        <button onclick="signOut()" class="btn-secondary" style="margin-top: 10px;">Sign Out</button>
+                    </div>
+                    <button onclick="testHealth()" class="btn-secondary">Health Check</button>
+                </div>
+            </div>
+
+            <!-- PDF Upload Section -->
+            <div class="card">
+                <h2>📄 PDF Upload</h2>
+                <div class="form-group">
+                    <label>Upload Recipe PDF:</label>
+                    <div class="file-upload" id="fileUpload" onclick="document.getElementById('pdfFile').click()">
+                        <div class="file-upload-icon">📁</div>
+                        <div id="fileUploadText">Click or drag PDF file here</div>
+                        <input type="file" id="pdfFile" accept=".pdf" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="storeSelect">Store (Optional):</label>
+                    <select id="storeSelect">
+                        <option value="">Select Store</option>
+                        <option value="Metro">Metro</option>
+                        <option value="Loblaws">Loblaws</option>
+                        <option value="No Frills">No Frills</option>
+                        <option value="Walmart">Walmart</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="locationInput">Location:</label>
+                        <input type="text" id="locationInput" placeholder="e.g., Toronto" value="Toronto">
+                    </div>
+                    <div class="form-group">
+                        <label for="dateInput">Date:</label>
+                        <input type="text" id="dateInput" placeholder="YYYY-MM-DD" value="">
+                    </div>
+                </div>
+
+                <button onclick="parseOnly()" class="btn-success">Parse Only</button>
+                <button onclick="parseAndPrice()">Parse + Price</button>
+            </div>
+
+            <!-- API Testing Section -->
+            <div class="card" style="grid-column: 1 / -1;">
+                <h2>🧪 API Testing</h2>
+                <button onclick="testGetRecipes()">Get My Recipes</button>
+                <button onclick="testSearchIngredients()">Search Ingredients</button>
+                <button onclick="testPriceExistingRecipe()">Price Existing Recipe</button>
+                <button onclick="clearResponse()" class="btn-secondary">Clear Response</button>
+            </div>
+
+            <!-- Loading Section -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>Processing your request...</div>
+            </div>
+
+            <!-- Response Section -->
+            <div class="response-section">
+                <div class="card">
+                    <div class="response-header">
+                        <h2>📡 API Response</h2>
+                        <span id="responseStatus"></span>
+                    </div>
+                    <div class="response-container">
+                        <pre id="responseContent" class="json-pretty">No requests made yet. Try the Health Check button!</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recipe Preview Section -->
+            <div id="recipePreview" style="display: none; grid-column: 1 / -1;">
+                <div class="card">
+                    <h2>🍽️ Recipe Preview</h2>
+                    <div id="recipeContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        let authToken = '';
+        let currentUser = null;
+
+        // Firebase Configuration - ADD YOUR CONFIG HERE
+        const firebaseConfig = {
+            apiKey: "your-api-key-here",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.error('Firebase initialization failed:', error);
+        }
+
+        // Set today's date as default
+        document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+
+        // File upload handling
+        const fileUpload = document.getElementById('fileUpload');
+        const pdfFile = document.getElementById('pdfFile');
+        const fileUploadText = document.getElementById('fileUploadText');
+
+        pdfFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileUploadText.textContent = `Selected: ${file.name}`;
+                fileUpload.style.background = '#d4edda';
+                fileUpload.style.borderColor = '#00b894';
+            }
+        });
+
+        // Drag and drop
+        fileUpload.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            fileUpload.classList.add('dragover');
+        });
+
+        fileUpload.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            fileUpload.classList.remove('dragover');
+        });
+
+        fileUpload.addEventListener('drop', function(e) {
+            e.preventDefault();
+            fileUpload.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                pdfFile.files = files;
+                fileUploadText.textContent = `Selected: ${files[0].name}`;
+                fileUpload.style.background = '#d4edda';
+                fileUpload.style.borderColor = '#00b894';
+            } else {
+                alert('Please drop a PDF file only');
+            }
+        });
+
+        // Firebase Auth Functions
+        function showSignInForm() {
+            document.getElementById('signInForm').style.display = 'block';
+            document.getElementById('tokenForm').style.display = 'none';
+        }
+
+        function showTokenForm() {
+            document.getElementById('signInForm').style.display = 'none';
+            document.getElementById('tokenForm').style.display = 'block';
+        }
+
+        async function signInWithEmail() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                // Sign in with Firebase Auth
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Get the ID token
+                const idToken = await user.getIdToken();
+                
+                // Store the token and user info
+                authToken = idToken;
+                currentUser = user;
+                
+                // Update UI
+                updateAuthStatus(true, `Signed in as ${user.email}`);
+                updateUserInfo(user);
+                
+                // Auto-test the connection with your backend
+                await testAuth();
+                
+                console.log('Sign in successful:', user.email);
+                
+            } catch (error) {
+                console.error('Sign in failed:', error);
+                updateAuthStatus(false, `Sign in failed: ${error.message}`);
+                
+                // Show user-friendly error messages
+                let errorMessage = 'Sign in failed. ';
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage += 'No account found with this email.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage += 'Incorrect password.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage += 'Invalid email address.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage += 'Too many failed attempts. Please try again later.';
+                        break;
+                    default:
+                        errorMessage += error.message;
+                }
+                alert(errorMessage);
+            }
+            showLoading(false);
+        }
+
+        async function signOut() {
+            try {
+                await firebase.auth().signOut();
+                authToken = '';
+                currentUser = null;
+                updateAuthStatus(false, 'Signed out');
+                updateUserInfo(null);
+                
+                // Clear form fields
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('firebaseToken').value = '';
+                
+                console.log('Sign out successful');
+            } catch (error) {
+                console.error('Sign out failed:', error);
+                alert('Sign out failed: ' + error.message);
+            }
+        }
+
+        function updateUserInfo(user) {
+            const userInfo = document.getElementById('userInfo');
+            const userDetails = document.getElementById('userDetails');
+            
+            if (user) {
+                userDetails.innerHTML = `
+                    <div><strong>Email:</strong> ${user.email}</div>
+                    <div><strong>Email Verified:</strong> ${user.emailVerified ? 'Yes' : 'No'}</div>
+                    <div><strong>UID:</strong> ${user.uid}</div>
+                    <div style="margin-top: 8px;"><strong>Token:</strong> <small style="word-break: break-all; font-family: monospace;">${authToken.substring(0, 50)}...</small></div>
+                `;
+                userInfo.style.display = 'block';
+            } else {
+                userInfo.style.display = 'none';
+            }
+        }
+
+        // Listen for auth state changes
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user && !currentUser) {
+                // User is signed in
+                currentUser = user;
+                authToken = await user.getIdToken();
+                updateAuthStatus(true, `Signed in as ${user.email}`);
+                updateUserInfo(user);
+                console.log('Auth state changed: User signed in');
+            } else if (!user && currentUser) {
+                // User is signed out
+                currentUser = null;
+                authToken = '';
+                updateAuthStatus(false, 'Not connected');
+                updateUserInfo(null);
+                console.log('Auth state changed: User signed out');
+            }
+        });
+
+        // Get auth token from input or current user
+        async function getAuthToken() {
+            if (currentUser) {
+                // Get fresh token from current user
+                try {
+                    authToken = await currentUser.getIdToken(true); // Force refresh
+                    return authToken;
+                } catch (error) {
+                    console.error('Error getting token:', error);
+                }
+            }
+            
+            // Fallback to manual token input
+            const manualToken = document.getElementById('firebaseToken').value.trim();
+            if (manualToken) {
+                authToken = manualToken;
+                return authToken;
+            }
+            
+            return authToken;
+        }
+
+        // Update auth status
+        function updateAuthStatus(connected, message) {
+            const status = document.getElementById('authStatus');
+            if (connected) {
+                status.className = 'auth-status connected';
+                status.textContent = message || 'Connected ✅';
+            } else {
+                status.className = 'auth-status disconnected';
+                status.textContent = message || 'Not Connected ❌';
+            }
+        }
+
+        // Show loading
+        function showLoading(show = true) {
+            document.getElementById('loading').classList.toggle('show', show);
+        }
+
+        // Display response
+        function displayResponse(response, status, endpoint) {
+            const statusEl = document.getElementById('responseStatus');
+            const contentEl = document.getElementById('responseContent');
+            
+            statusEl.textContent = `${endpoint} - ${status}`;
+            statusEl.className = status.includes('200') ? 'status-success' : 'status-error';
+            
+            if (typeof response === 'object') {
+                contentEl.textContent = JSON.stringify(response, null, 2);
+            } else {
+                contentEl.textContent = response;
+            }
+
+            // Show recipe preview if it's a successful parse
+            if (response.success && response.data && response.data.recipe) {
+                showRecipePreview(response.data);
+            }
+        }
+
+        // Show recipe preview
+        function showRecipePreview(data) {
+            const preview = document.getElementById('recipePreview');
+            const content = document.getElementById('recipeContent');
+            
+            const recipe = data.recipe;
+            let html = `
+                <div class="recipe-preview">
+                    <div class="recipe-title">${recipe.name}</div>
+                    <div class="recipe-meta">Serves ${recipe.portions} people</div>
+                    
+                    <h4>Ingredients:</h4>
+                    <ul class="ingredients-list">
+            `;
+            
+            recipe.ingredients.forEach(ingredient => {
+                html += `
+                    <li>
+                        <span class="ingredient-name">${ingredient.name}</span>
+                        <span class="ingredient-details">${ingredient.quantity} ${ingredient.unit} (${ingredient.type})</span>
+                    </li>
+                `;
+            });
+            
+            html += '</ul>';
+            
+            // Show pricing if available
+            if (data.pricing) {
+                const pricing = data.pricing;
+                html += `
+                    <h4>Pricing:</h4>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                        <div><strong>Regular Price:</strong> $${pricing.regularPrice}</div>
+                        <div><strong>Sale Price:</strong> $${pricing.salePrice}</div>
+                        <div><strong>Savings:</strong> $${pricing.totalSavings} (${pricing.savingsPercentage}%)</div>
+                        <div><strong>Cost per Serving:</strong> $${pricing.salePricePerServing}</div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            content.innerHTML = html;
+            preview.style.display = 'block';
+        }
+
+        // API Functions
+        async function testHealth() {
+            showLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                displayResponse(data, `${response.status} ${response.statusText}`, 'GET /health');
+            } catch (error) {
+                displayResponse({error: error.message}, 'Network Error', 'GET /health');
+            }
+            showLoading(false);
+        }
+
+        async function testAuth() {
+            const token = await getAuthToken();
+            if (!token) {
+                alert('Please sign in or enter a Firebase token first');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}/recipes`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    updateAuthStatus(true, 'Connected & Authenticated ✅');
+                } else {
+                    updateAuthStatus(false, 'Invalid Token ❌');
+                }
+                
+                displayResponse(data, `${response.status} ${response.statusText}`, 'GET /recipes (auth test)');
+            } catch (error) {
+                updateAuthStatus(false, 'Connection Failed ❌');
+                displayResponse({error: error.message}, 'Network Error', 'Auth Test');
+            }
+            showLoading(false);
+        }
+
+        async function parseOnly() {
+            const token = await getAuthToken();
+            const file = pdfFile.files[0];
+            
+            if (!token) {
+                alert('Please sign in or enter a Firebase token first');
+                return;
+            }
+            
+            if (!file) {
+                alert('Please select a PDF file first');
+                return;
+            }
+
+            showLoading(true);
+            const formData = new FormData();
+            formData.append('pdf', file);
+
+            try {
+                const response = await fetch(`${API_BASE}/parse-recipe-only`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                displayResponse(data, `${response.status} ${response.statusText}`, 'POST /parse-recipe-only');
+            } catch (error) {
+                displayResponse({error: error.message}, 'Network Error', 'Parse Only');
+            }
+            showLoading(false);
+        }
+
+        async function parseAndPrice() {
+            const token = await getAuthToken();
+            const file = pdfFile.files[0];
+            const store = document.getElementById('storeSelect').value;
+            const location = document.getElementById('locationInput').value;
+            const date = document.getElementById('dateInput').value;
+            
+            if (!token) {
+                alert('Please sign in or enter a Firebase token first');
+                return;
+            }
+            
+            if (!file) {
+                alert('Please select a PDF file first');
+                return;
+            }
+
+            showLoading(true);
+            const formData = new FormData();
+            formData.append('pdf', file);
+            if (store) formData.append('store', store);
+            if (location) formData.append('location', location);
+            if (date) formData.append('date', date);
+            formData.append('enhance', 'true');
+
+            try {
+                const response = await fetch(`${API_BASE}/price-recipe`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                displayResponse(data, `${response.status} ${response.statusText}`, 'POST /price-recipe');
+            } catch (error) {
+                displayResponse({error: error.message}, 'Network Error', 'Parse and Price');
+            }
+            showLoading(false);
+        }
+
+        async function testGetRecipes() {
+            const token = await getAuthToken();
+            if (!token) {
+                alert('Please sign in or enter a Firebase token first');
+                return;
+            }
+
+            showLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}/recipes?page=1&limit=10`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                displayResponse(data, `${response.status} ${response.statusText}`, 'GET /recipes');
+            } catch (error) {
+                displayResponse({error: error.message}, 'Network Error', 'Get Recipes');
+            }
+            showLoading(false);
+        }
+
+        async function testSearchIngredients() {
+            const token = await getAuthToken();
+            if (!token) {
+                alert('Please sign in or enter a Firebase token first');
+                return;
+            }
+
+            const query = prompt('Search for ingredient:', 'flour');
+            if (!query) return;
+
+            showLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}/ingredients/search?q=${encodeURIComponent(query)}&limit=10`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                displayResponse(data, `${response.status} ${response.statusText}`, `GET /ingredients/search?q=${query}`);
+            } catch (error) {
+                displayResponse({error: error.message}, 'Network Error', 'Search Ingredients');
+            }
+            showLoading(false);
+        }
+
+        async function testPriceExistingRecipe() {
+            const token = await getAuthToken();
+            if (!token) {
+                alert('Please sign in or enter a Firebase token first');
+                return;
+            }
+
+            const recipeId = prompt('Enter recipe ID (without .json):', '');
+            if (!recipeId) return;
+
+            showLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}/price-existing-recipe`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        recipeId: recipeId,
+                        store: 'Metro',
+                        location: 'Toronto',
+                        date: new Date().toISOString().split('T')[0]
+                    })
+                });
+                const data = await response.json();
+                displayResponse(data, `${response.status} ${response.statusText}`, 'POST /price-existing-recipe');
+            } catch (error) {
+                displayResponse({error: error.message}, 'Network Error', 'Price Existing Recipe');
+            }
+            showLoading(false);
+        }
+
+        function clearResponse() {
+            document.getElementById('responseContent').textContent = 'Response cleared.';
+            document.getElementById('responseStatus').textContent = '';
+            document.getElementById('recipePreview').style.display = 'none';
+        }
+
+        // Auto-focus on token input
+        document.getElementById('firebaseToken').focus();
+    </script>
+</body>
+</html>
