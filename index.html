@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe PDF Parser Service - Test Interface</title>
+    <title>Recipe Processing Test Frontend</title>
     <style>
         * {
             margin: 0;
@@ -12,1008 +12,364 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section {
             background: white;
-            margin-bottom: 20px;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .section h2 {
-            color: #333;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 5px;
-        }
-
-        .section h3 {
-            color: #555;
-            margin: 15px 0 10px 0;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-
-        input, textarea, select {
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
         }
 
-        textarea {
-            height: 100px;
-            resize: vertical;
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
         }
 
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-right: 10px;
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
             margin-bottom: 10px;
         }
 
-        button:hover {
-            background-color: #45a049;
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
         }
 
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
+        .upload-zone {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #f8f9ff, #f0f2ff);
         }
 
-        .status {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
+        .upload-zone:hover {
+            border-color: #764ba2;
+            background: linear-gradient(45deg, #f0f2ff, #e8ebff);
+            transform: translateY(-2px);
         }
 
-        .status.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .upload-zone.dragover {
+            border-color: #764ba2;
+            background: linear-gradient(45deg, #e8ebff, #dde1ff);
+            transform: scale(1.02);
         }
 
-        .status.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .upload-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+            display: block;
         }
 
-        .status.info {
-            background-color: #cce8ff;
-            color: #004085;
-            border: 1px solid #99d3ff;
+        .upload-text {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
         }
 
-        .response-container {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
-            padding: 15px;
-            margin-top: 10px;
+        .upload-subtext {
+            color: #666;
+            font-size: 1rem;
         }
 
-        .response-container pre {
-            white-space: pre-wrap;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .hidden {
+        .file-input {
             display: none;
         }
 
-        .file-drop {
-            border: 2px dashed #ddd;
-            border-radius: 4px;
-            padding: 40px;
-            text-align: center;
-            background-color: #fafafa;
-            transition: border-color 0.3s;
+        .status {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            display: none;
+            animation: slideIn 0.3s ease;
         }
 
-        .file-drop.dragover {
-            border-color: #4CAF50;
-            background-color: #f0fff0;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .file-info {
-            background-color: #e7f3ff;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
+        .status.loading {
+            background: linear-gradient(90deg, #ffeaa7, #fdcb6e);
+            color: #2d3436;
+            display: block;
         }
 
-        .user-info {
-            background-color: #e8f5e8;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
+        .status.success {
+            background: linear-gradient(90deg, #55efc4, #00b894);
+            color: white;
+            display: block;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .status.error {
+            background: linear-gradient(90deg, #fd79a8, #e84393);
+            color: white;
+            display: block;
         }
 
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .loading {
+        .spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #4CAF50;
+            border: 3px solid rgba(255,255,255,.3);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .file-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .config-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .config-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .result-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .result-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            color: #333;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Recipe PDF Parser Service - Test Interface</h1>
-        
-        <!-- Service Status Section -->
-        <div class="section">
-            <h2>🏥 Service Health & Debugging</h2>
-            <button onclick="checkHealth()">Check Service Health</button>
-            <button onclick="testCORS()">Test CORS Configuration</button>
-            <button onclick="testAuthEndpoint()">Test Auth Endpoint</button>
-            <div id="healthStatus"></div>
-            
-            <h3>Backend Configuration</h3>
-            <div class="form-group">
-                <label>Backend URL:</label>
-                <input type="text" id="backendUrl" value="http://localhost:3001" onchange="updateBackendUrl()">
-            </div>
-            <button onclick="testConnection()">Test Connection</button>
-            
-            <h3>Common Issues & Solutions</h3>
-            <div class="status info">
-                <strong>If registration fails, check:</strong><br>
-                1. Is your NestJS backend running on the correct port?<br>
-                2. Is Firebase configured properly in your backend?<br>
-                3. Are CORS headers configured to allow requests from this origin?<br>
-                4. Check your backend console for detailed error logs<br>
-                5. Ensure all environment variables are set (FIREBASE_*, ANTHROPIC_API_KEY)<br>
-                6. Verify Firebase project configuration is correct
+        <div class="header">
+            <h1>🍳 Recipe Processor</h1>
+            <p>Upload a PDF recipe to test the backend processing</p>
+        </div>
+
+        <div class="config-section">
+            <div class="config-title">🔧 Backend Configuration</div>
+            <input type="text" class="config-input" id="backendUrl" placeholder="Backend URL" value="http://localhost:3001">
+            <div class="config-grid">
+                <input type="text" class="config-input" id="store" placeholder="Store" value="Walmart">
+                <input type="text" class="config-input" id="location" placeholder="Location" value="100 The Boardwalk">
             </div>
         </div>
 
-        <!-- Authentication Section -->
-        <div class="section">
-            <h2>🔐 Authentication</h2>
-            
-            <div id="authStatus">
-                <div class="status info">Not authenticated</div>
-            </div>
-            
-            <div id="loginSection">
-                <div class="grid">
-                    <div>
-                        <h3>Register New Account</h3>
-                        <div class="form-group">
-                            <label>Email:</label>
-                            <input type="email" id="registerEmail" placeholder="test@example.com">
-                        </div>
-                        <div class="form-group">
-                            <label>Password:</label>
-                            <input type="password" id="registerPassword" placeholder="Password (min 6 chars)">
-                        </div>
-                        <div class="form-group">
-                            <label>Display Name:</label>
-                            <input type="text" id="registerDisplayName" placeholder="Your Name">
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="registerNotifications" checked>
-                                Enable flyer notifications
-                            </label>
-                        </div>
-                        <button onclick="register()">Register</button>
-                    </div>
-                    
-                    <div>
-                        <h3>Login to Existing Account</h3>
-                        <div class="form-group">
-                            <label>Email:</label>
-                            <input type="email" id="loginEmail" placeholder="test@example.com">
-                        </div>
-                        <div class="form-group">
-                            <label>Password:</label>
-                            <input type="password" id="loginPassword" placeholder="Password">
-                        </div>
-                        <button onclick="login()">Login</button>
-                        
-                        <h3>Password Reset</h3>
-                        <div class="form-group">
-                            <label>Email:</label>
-                            <input type="email" id="resetEmail" placeholder="test@example.com">
-                        </div>
-                        <button onclick="resetPassword()">Reset Password</button>
-                    </div>
-                </div>
-
-                <h3>Manual Token Entry (for testing)</h3>
-                <div class="form-group">
-                    <label>Firebase ID Token:</label>
-                    <textarea id="manualToken" placeholder="Paste Firebase ID token here for manual testing"></textarea>
-                </div>
-                <button onclick="setManualToken()">Use Manual Token</button>
-            </div>
-            
-            <div id="userSection" class="hidden">
-                <div id="userInfo" class="user-info"></div>
-                <button onclick="getProfile()">Get Profile</button>
-                <button onclick="logout()">Logout</button>
-            </div>
+        <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">📄</div>
+            <div class="upload-text">Drop your recipe PDF here</div>
+            <div class="upload-subtext">or click to browse files</div>
+            <input type="file" class="file-input" id="fileInput" accept=".pdf">
         </div>
 
-        <!-- PDF Upload & Processing Section -->
-        <div class="section">
-            <h2>📄 PDF Recipe Processing</h2>
-            
-            <div id="uploadSection" class="hidden">
-                <h3>Upload PDF Recipe</h3>
-                
-                <div class="file-drop" id="fileDropZone">
-                    <p>Drag and drop a PDF file here, or click to select</p>
-                    <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;">
-                    <button onclick="document.getElementById('pdfFileInput').click()">Select PDF File</button>
-                </div>
-                
-                <div id="fileInfo" class="file-info hidden"></div>
-                
-                <h3>Pricing Options (Optional)</h3>
-                <div class="grid">
-                    <div>
-                        <div class="form-group">
-                            <label>Store:</label>
-                            <select id="store">
-                                <option value="">Select Store</option>
-                                <option value="Metro">Metro</option>
-                                <option value="Loblaws">Loblaws</option>
-                                <option value="NoFrills">No Frills</option>
-                                <option value="Sobeys">Sobeys</option>
-                                <option value="FreshCo">FreshCo</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Location:</label>
-                            <input type="text" id="location" placeholder="e.g., Toronto, ON">
-                        </div>
-                    </div>
-                    <div>
-                        <div class="form-group">
-                            <label>Date (YYYY-MM-DD):</label>
-                            <input type="date" id="date">
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="enhance">
-                                Enhanced processing
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                
-                <button onclick="priceRecipe()">Parse + Price Recipe</button>
-                <button onclick="parseRecipeOnly()">Parse Recipe Only</button>
-            </div>
-            
-            <div id="needAuthMessage" class="status info">
-                Please login first to upload and process PDF files.
-            </div>
+        <div class="file-info" id="fileInfo">
+            <div class="file-name" id="fileName"></div>
+            <div class="file-size" id="fileSize"></div>
         </div>
 
-        <!-- Recipe Management Section -->
-        <div class="section">
-            <h2>📚 Recipe Management</h2>
-            
-            <div id="recipeManagementSection" class="hidden">
-                <button onclick="getUserRecipes()">Get My Recipes</button>
-                <button onclick="searchIngredients()">Search Ingredients</button>
-                
-                <h3>Search Ingredients</h3>
-                <div class="form-group">
-                    <label>Search Query:</label>
-                    <input type="text" id="ingredientQuery" placeholder="e.g., flour, tomato, chicken">
-                </div>
-                <div class="form-group">
-                    <label>Limit:</label>
-                    <input type="number" id="ingredientLimit" value="10" min="1" max="50">
-                </div>
-                
-                <h3>Re-price Existing Recipe</h3>
-                <div class="form-group">
-                    <label>Recipe ID:</label>
-                    <input type="text" id="repriceRecipeId" placeholder="Enter recipe ID from your recipes list">
-                </div>
-                <button onclick="repriceRecipe()">Re-price Recipe</button>
-            </div>
-            
-            <div id="needAuthMessage2" class="status info">
-                Please login first to manage recipes.
-            </div>
-        </div>
+        <div class="status" id="status"></div>
 
-        <!-- API Response Section -->
-        <div class="section">
-            <h2>📊 API Responses & Output</h2>
-            
-            <div class="form-group">
-                <label>Response Filter:</label>
-                <select id="responseFilter" onchange="filterResponses()">
-                    <option value="all">All Responses</option>
-                    <option value="auth">Authentication Only</option>
-                    <option value="recipe">Recipe Processing Only</option>
-                    <option value="health">Health Checks Only</option>
-                    <option value="error">Errors Only</option>
-                </select>
-            </div>
-            
-            <button onclick="clearResponses()">Clear All Responses</button>
-            
-            <div id="responseContainer">
-                <div class="status info">API responses will appear here as you interact with the service.</div>
-            </div>
+        <div class="result-section" id="resultSection">
+            <div class="result-title">📊 Processing Result</div>
+            <div class="result-content" id="resultContent"></div>
         </div>
     </div>
 
     <script>
-        // Global variables
-        let currentUser = null;
-        let authToken = null;
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const status = document.getElementById('status');
+        const resultSection = document.getElementById('resultSection');
+        const resultContent = document.getElementById('resultContent');
+        const backendUrl = document.getElementById('backendUrl');
+
         let selectedFile = null;
-        let API_BASE = 'http://localhost:3001'; // Update this to match your backend URL
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            setupFileUpload();
-            setCurrentDate();
-            checkHealth();
+
+        // Click to upload
+        uploadZone.addEventListener('click', () => {
+            fileInput.click();
         });
-        
-        function setCurrentDate() {
-            document.getElementById('date').value = new Date().toISOString().split('T')[0];
-        }
-        
-        function setupFileUpload() {
-            const fileInput = document.getElementById('pdfFileInput');
-            const dropZone = document.getElementById('fileDropZone');
-            
-            fileInput.addEventListener('change', handleFileSelect);
-            
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.classList.add('dragover');
-            });
-            
-            dropZone.addEventListener('dragleave', () => {
-                dropZone.classList.remove('dragover');
-            });
-            
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0 && files[0].type === 'application/pdf') {
-                    fileInput.files = files;
-                    handleFileSelect({ target: fileInput });
-                } else {
-                    logResponse('error', 'File Upload', 'Please select a PDF file');
-                }
-            });
-        }
-        
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                if (file.type === 'application/pdf') {
-                    selectedFile = file;
-                    const fileInfo = document.getElementById('fileInfo');
-                    fileInfo.innerHTML = `
-                        <strong>Selected File:</strong> ${file.name}<br>
-                        <strong>Size:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB<br>
-                        <strong>Type:</strong> ${file.type}
-                    `;
-                    fileInfo.classList.remove('hidden');
-                } else {
-                    logResponse('error', 'File Upload', 'Please select a PDF file');
-                }
-            }
-        }
-        
-        // Authentication Functions
-        async function register() {
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const displayName = document.getElementById('registerDisplayName').value;
-            const newFlyerNotifications = document.getElementById('registerNotifications').checked;
-            
-            if (!email || !password) {
-                logResponse('error', 'Registration', 'Email and password are required');
+
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file) return;
+
+            if (file.type !== 'application/pdf') {
+                showStatus('error', '❌ Please upload a PDF file only');
                 return;
             }
+
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            fileInfo.style.display = 'block';
             
-            // Validation checks
-            if (password.length < 6) {
-                logResponse('error', 'Registration', 'Password must be at least 6 characters long');
-                return;
-            }
-            
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                logResponse('error', 'Registration', 'Please enter a valid email address');
-                return;
-            }
-            
-            const requestData = {
-                email: email.trim().toLowerCase(),
-                password,
-                displayName: displayName?.trim() || '',
-                newFlyerNotifications
-            };
-            
-            logResponse('info', 'Registration Debug', `Sending request to: ${API_BASE}/auth/register`);
-            logResponse('info', 'Registration Debug', `Request data: ${JSON.stringify(requestData, null, 2)}`);
-            
-            try {
-                const response = await fetch(`${API_BASE}/auth/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                });
-                
-                logResponse('info', 'Registration Debug', `Response status: ${response.status} ${response.statusText}`);
-                logResponse('info', 'Registration Debug', `Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`);
-                
-                const data = await response.json();
-                logResponse(data.success ? 'success' : 'error', 'Registration', data);
-                
-                if (data.success && data.data) {
-                    setAuthenticatedUser(data.data.user, data.data.accessToken);
-                }
-            } catch (error) {
-                logResponse('error', 'Registration', `Network error: ${error.message}`);
-                logResponse('error', 'Registration Debug', `Full error: ${JSON.stringify(error, Object.getOwnPropertyNames(error))}`);
-            }
+            // Auto-upload after file selection
+            setTimeout(() => {
+                uploadFile();
+            }, 500);
         }
-        
-        async function login() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!email || !password) {
-                logResponse('error', 'Login', 'Email and password are required');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
-                });
-                
-                const data = await response.json();
-                logResponse(data.success ? 'success' : 'error', 'Login', data);
-                
-                if (data.success && data.data) {
-                    setAuthenticatedUser(data.data.user, data.data.accessToken);
-                }
-            } catch (error) {
-                logResponse('error', 'Login', `Network error: ${error.message}`);
-            }
-        }
-        
-        async function resetPassword() {
-            const email = document.getElementById('resetEmail').value;
-            
-            if (!email) {
-                logResponse('error', 'Password Reset', 'Email is required');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/auth/reset-password`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email })
-                });
-                
-                const data = await response.json();
-                logResponse(data.success ? 'success' : 'error', 'Password Reset', data);
-            } catch (error) {
-                logResponse('error', 'Password Reset', `Network error: ${error.message}`);
-            }
-        }
-        
-        async function getProfile() {
-            if (!authToken) {
-                logResponse('error', 'Get Profile', 'Please login first');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/auth/profile`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                const data = await response.json();
-                logResponse(data.success ? 'success' : 'error', 'Get Profile', data);
-            } catch (error) {
-                logResponse('error', 'Get Profile', `Network error: ${error.message}`);
-            }
-        }
-        
-        async function logout() {
-            if (!authToken) {
-                logResponse('error', 'Logout', 'No active session');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/auth/logout`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                const data = await response.json();
-                logResponse(data.success ? 'success' : 'error', 'Logout', data);
-                
-                if (data.success) {
-                    clearAuthenticatedUser();
-                }
-            } catch (error) {
-                logResponse('error', 'Logout', `Network error: ${error.message}`);
-            }
-        }
-        
-        function setManualToken() {
-            const token = document.getElementById('manualToken').value.trim();
-            if (token) {
-                authToken = token;
-                currentUser = { uid: 'manual-test-user', email: 'manual@test.com' };
-                updateAuthUI();
-                logResponse('info', 'Manual Token', 'Manual token set for testing');
-            }
-        }
-        
-        function setAuthenticatedUser(user, token) {
-            currentUser = user;
-            authToken = token;
-            updateAuthUI();
-        }
-        
-        function clearAuthenticatedUser() {
-            currentUser = null;
-            authToken = null;
-            updateAuthUI();
-        }
-        
-        function updateAuthUI() {
-            const authStatus = document.getElementById('authStatus');
-            const loginSection = document.getElementById('loginSection');
-            const userSection = document.getElementById('userSection');
-            const uploadSection = document.getElementById('uploadSection');
-            const recipeManagementSection = document.getElementById('recipeManagementSection');
-            const needAuthMessage = document.getElementById('needAuthMessage');
-            const needAuthMessage2 = document.getElementById('needAuthMessage2');
-            
-            if (currentUser && authToken) {
-                authStatus.innerHTML = `
-                    <div class="status success">
-                        Authenticated as: ${currentUser.email || currentUser.uid}<br>
-                        User ID: ${currentUser.uid}
-                    </div>
-                `;
-                loginSection.classList.add('hidden');
-                userSection.classList.remove('hidden');
-                uploadSection.classList.remove('hidden');
-                recipeManagementSection.classList.remove('hidden');
-                needAuthMessage.classList.add('hidden');
-                needAuthMessage2.classList.add('hidden');
-                
-                document.getElementById('userInfo').innerHTML = `
-                    <strong>User Information:</strong><br>
-                    Email: ${currentUser.email || 'N/A'}<br>
-                    Display Name: ${currentUser.displayName || 'N/A'}<br>
-                    UID: ${currentUser.uid}<br>
-                    Email Verified: ${currentUser.emailVerified || 'N/A'}
-                `;
-            } else {
-                authStatus.innerHTML = '<div class="status info">Not authenticated</div>';
-                loginSection.classList.remove('hidden');
-                userSection.classList.add('hidden');
-                uploadSection.classList.add('hidden');
-                recipeManagementSection.classList.add('hidden');
-                needAuthMessage.classList.remove('hidden');
-                needAuthMessage2.classList.remove('hidden');
-            }
-        }
-        
-        // Recipe Processing Functions
-        async function priceRecipe() {
-            if (!selectedFile) {
-                logResponse('error', 'Price Recipe', 'Please select a PDF file first');
-                return;
-            }
-            
-            if (!authToken) {
-                logResponse('error', 'Price Recipe', 'Please login first');
-                return;
-            }
-            
+
+        async function uploadFile() {
+            if (!selectedFile) return;
+
             const formData = new FormData();
-            formData.append('pdf', selectedFile);
-            formData.append('store', document.getElementById('store').value);
-            formData.append('location', document.getElementById('location').value);
-            formData.append('date', document.getElementById('date').value);
-            formData.append('enhance', document.getElementById('enhance').checked);
-            
+            formData.append('file', selectedFile);
+
+            showStatus('loading', '🔄 Processing recipe... This may take a moment');
+            resultSection.style.display = 'none';
+
             try {
-                showLoading('priceRecipe');
-                const response = await fetch(`${API_BASE}/api/price-recipe`, {
+                const response = await fetch(`${backendUrl.value}/recipe-processing/upload`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    },
                     body: formData
                 });
-                
-                const data = await response.json();
-                logResponse(data.success ? 'success' : 'error', 'Price Recipe', data);
-            } catch (error) {
-                logResponse('error', 'Price Recipe', `Network error: ${error.message}`);
-            } finally {
-                hideLoading('priceRecipe');
-            }
-        }
-        
-        async function parseRecipeOnly() {
-            if (!selectedFile) {
-                logResponse('error', 'Parse Recipe', 'Please select a PDF file first');
-                return;
-            }
-            
-            if (!authToken) {
-                logResponse('error', 'Parse Recipe', 'Please login first');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('pdf', selectedFile);
-            
-            try {
-                showLoading('parseRecipeOnly');
-                const response = await fetch(`${API_BASE}/api/parse-recipe-only`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: formData
-                });
-                
-                const data = await response.json();
-                logResponse(data.success ? 'success' : 'error', 'Parse Recipe Only', data);
-            } catch (error) {
-                logResponse('error', 'Parse Recipe Only', `Network error: ${error.message}`);
-            } finally {
-                hideLoading('parseRecipeOnly');
-            }
-        }
-        
-        async function getUserRecipes() {
-            if (!authToken) {
-                logResponse('error', 'Get Recipes', 'Please login first');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/recipes?page=1&limit=10`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                const data = await response.json();
-                logResponse(data.success ? 'success' : 'error', 'Get User Recipes', data);
-            } catch (error) {
-                logResponse('error', 'Get User Recipes', `Network error: ${error.message}`);
-            }
-        }
-        
-        async function searchIngredients() {
-            const query = document.getElementById('ingredientQuery').value.trim();
-            const limit = document.getElementById('ingredientLimit').value;
-            
-            if (!query || query.length < 2) {
-                logResponse('error', 'Search Ingredients', 'Query must be at least 2 characters');
-                return;
-            }
-            
-            if (!authToken) {
-                logResponse('error', 'Search Ingredients', 'Please login first');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/ingredients/search?q=${encodeURIComponent(query)}&limit=${limit}`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
-                
-                const data = await response.json();
-                logResponse(data.success ? 'success' : 'error', 'Search Ingredients', data);
-            } catch (error) {
-                logResponse('error', 'Search Ingredients', `Network error: ${error.message}`);
-            }
-        }
-        
-        async function repriceRecipe() {
-            const recipeId = document.getElementById('repriceRecipeId').value.trim();
-            const store = document.getElementById('store').value;
-            const location = document.getElementById('location').value;
-            const date = document.getElementById('date').value;
-            
-            if (!recipeId) {
-                logResponse('error', 'Re-price Recipe', 'Recipe ID is required');
-                return;
-            }
-            
-            if (!authToken) {
-                logResponse('error', 'Re-price Recipe', 'Please login first');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/price-existing-recipe`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        recipeId,
-                        store,
-                        location,
-                        date
-                    })
-                });
-                
-                const data = await response.json();
-                logResponse(data.success ? 'success' : 'error', 'Re-price Recipe', data);
-            } catch (error) {
-                logResponse('error', 'Re-price Recipe', `Network error: ${error.message}`);
-            }
-        }
-        
-        // Health Check and Debugging Functions
-        async function checkHealth() {
-            try {
-                const response = await fetch(`${API_BASE}/api/health`);
-                const data = await response.json();
-                
-                const healthStatus = document.getElementById('healthStatus');
-                if (data.success) {
-                    healthStatus.innerHTML = `
-                        <div class="status success">
-                            Service is healthy<br>
-                            Status: ${data.data.status}<br>
-                            Uptime: ${Math.round(data.data.uptime)} seconds<br>
-                            Services: ${JSON.stringify(data.data.services)}
-                        </div>
-                    `;
-                } else {
-                    healthStatus.innerHTML = '<div class="status error">Service is unhealthy</div>';
-                }
-                
-                logResponse(data.success ? 'success' : 'error', 'Health Check', data);
-            } catch (error) {
-                const healthStatus = document.getElementById('healthStatus');
-                healthStatus.innerHTML = '<div class="status error">Cannot connect to service</div>';
-                logResponse('error', 'Health Check', `Network error: ${error.message}`);
-            }
-        }
-        
-        async function testCORS() {
-            try {
-                const response = await fetch(`${API_BASE}/api/health`, {
-                    method: 'OPTIONS'
-                });
-                
-                logResponse('info', 'CORS Test', {
-                    status: response.status,
-                    headers: Object.fromEntries(response.headers.entries())
-                });
-            } catch (error) {
-                logResponse('error', 'CORS Test', `CORS may not be configured properly: ${error.message}`);
-            }
-        }
-        
-        async function testAuthEndpoint() {
-            try {
-                const response = await fetch(`${API_BASE}/auth/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({}) // Empty body to test endpoint
-                });
-                
-                const data = await response.json();
-                logResponse('info', 'Auth Endpoint Test', {
-                    status: response.status,
-                    response: data,
-                    message: 'Auth endpoint is reachable (empty body test)'
-                });
-            } catch (error) {
-                logResponse('error', 'Auth Endpoint Test', `Auth endpoint unreachable: ${error.message}`);
-            }
-        }
-        
-        async function testConnection() {
-            const url = document.getElementById('backendUrl').value;
-            try {
-                const response = await fetch(`${url}/api/health`);
+
+                const result = await response.json();
+
                 if (response.ok) {
-                    logResponse('success', 'Connection Test', `Successfully connected to ${url}`);
+                    showStatus('success', `✅ ${result.message}`);
+                    showResult(result);
                 } else {
-                    logResponse('error', 'Connection Test', `Connection failed with status: ${response.status}`);
+                    showStatus('error', `❌ ${result.message || 'Upload failed'}`);
+                    if (result.error) {
+                        showResult({ error: result.error });
+                    }
                 }
             } catch (error) {
-                logResponse('error', 'Connection Test', `Cannot connect to ${url}: ${error.message}`);
+                showStatus('error', `❌ Network error: ${error.message}`);
+                showResult({ error: error.message, details: 'Check if your backend is running on the correct port' });
             }
         }
-        
-        function updateBackendUrl() {
-            const newUrl = document.getElementById('backendUrl').value;
-            API_BASE = newUrl;
-            logResponse('info', 'Configuration', `Backend URL updated to: ${newUrl}`);
-        }
-        
-        // Utility Functions
-        function showLoading(action) {
-            const buttons = document.querySelectorAll('button');
-            buttons.forEach(btn => {
-                if (btn.onclick && btn.onclick.toString().includes(action)) {
-                    btn.disabled = true;
-                    btn.innerHTML += '<span class="loading"></span>';
-                }
-            });
-        }
-        
-        function hideLoading(action) {
-            const buttons = document.querySelectorAll('button');
-            buttons.forEach(btn => {
-                if (btn.onclick && btn.onclick.toString().includes(action)) {
-                    btn.disabled = false;
-                    const loading = btn.querySelector('.loading');
-                    if (loading) loading.remove();
-                }
-            });
-        }
-        
-        function logResponse(type, action, data) {
-            const container = document.getElementById('responseContainer');
-            const timestamp = new Date().toLocaleString();
+
+        function showStatus(type, message) {
+            status.className = `status ${type}`;
             
-            const responseDiv = document.createElement('div');
-            responseDiv.className = `response-container ${type}`;
-            responseDiv.dataset.type = type;
-            responseDiv.dataset.action = action.toLowerCase().replace(/\s+/g, '-');
-            
-            responseDiv.innerHTML = `
-                <strong>[${timestamp}] ${action}</strong>
-                <pre>${typeof data === 'object' ? JSON.stringify(data, null, 2) : data}</pre>
-            `;
-            
-            container.appendChild(responseDiv);
-            responseDiv.scrollIntoView({ behavior: 'smooth' });
-            
-            // Keep only last 20 responses
-            const responses = container.querySelectorAll('.response-container');
-            if (responses.length > 20) {
-                responses[0].remove();
+            if (type === 'loading') {
+                status.innerHTML = `<span class="spinner"></span>${message}`;
+            } else {
+                status.innerHTML = message;
             }
         }
-        
-        function filterResponses() {
-            const filter = document.getElementById('responseFilter').value;
-            const responses = document.querySelectorAll('.response-container');
-            
-            responses.forEach(response => {
-                if (filter === 'all') {
-                    response.style.display = 'block';
-                } else if (filter === 'auth' && response.dataset.action.includes('auth') || 
-                          response.dataset.action.includes('login') || 
-                          response.dataset.action.includes('register') ||
-                          response.dataset.action.includes('profile')) {
-                    response.style.display = 'block';
-                } else if (filter === 'recipe' && (response.dataset.action.includes('recipe') || 
-                          response.dataset.action.includes('parse') ||
-                          response.dataset.action.includes('price') ||
-                          response.dataset.action.includes('ingredient'))) {
-                    response.style.display = 'block';
-                } else if (filter === 'health' && response.dataset.action.includes('health')) {
-                    response.style.display = 'block';
-                } else if (filter === 'error' && response.classList.contains('error')) {
-                    response.style.display = 'block';
+
+        function showResult(data) {
+            resultContent.textContent = JSON.stringify(data, null, 2);
+            resultSection.style.display = 'block';
+        }
+
+        // Test connection on page load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${backendUrl.value}/recipe-processing/health`);
+                if (response.ok) {
+                    console.log('✅ Backend connection successful');
                 } else {
-                    response.style.display = 'none';
+                    console.log('⚠️ Backend health check failed');
                 }
-            });
-        }
-        
-        function clearResponses() {
-            const container = document.getElementById('responseContainer');
-            container.innerHTML = '<div class="status info">API responses will appear here as you interact with the service.</div>';
-        }
-        
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                if (document.activeElement.id === 'loginEmail' || document.activeElement.id === 'loginPassword') {
-                    login();
-                } else if (document.activeElement.id === 'registerEmail' || document.activeElement.id === 'registerPassword') {
-                    register();
-                } else if (document.activeElement.id === 'ingredientQuery') {
-                    searchIngredients();
-                }
+            } catch (error) {
+                console.log('❌ Backend not reachable:', error.message);
             }
         });
     </script>
